@@ -1,45 +1,84 @@
 <?php
 if (filter_has_var(INPUT_POST, "enviar")) {
-
+    $datos = [];
 // Lectura, saneamiento y validación del dato de nombre
 // 3 a 25 caracteres en mayúsculas y minúsculas y espacio en blanco
+    $nombre = [];
+    $nombre['form'] = filter_input(INPUT_POST, 'nombre', FILTER_UNSAFE_RAW);
+    $nombre['san'] = filter_var($nombre['form'], FILTER_SANITIZE_SPECIAL_CHARS);
+    $nombre['err'] = filter_var($nombre['san'], FILTER_VALIDATE_REGEXP,
+                    ['options' => ['regexp' => "/^[a-z A-Záéíóúñ]{3,25}$/"]]) === false;
 
-    $nombre = filter_input(INPUT_POST, 'nombre', FILTER_UNSAFE_RAW);
-    $nombreError = filter_var($nombre, FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => "/^[a-z A-Z]{3,25}$/"]]) === false;
-
+    $datos['nombre'] = $nombre;
 // Lectura, saneamiento y validación del dato de contraseña
 // 6 a 8 caracteres con mayúsculas, minúsculas, digitos y los símbolos !@#$%^&*()+
 
-    $clave = filter_input(INPUT_POST, 'clave', FILTER_UNSAFE_RAW);
-    $claveError = filter_var($clave, FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => "/^[\w!@#\$%\^&\*\(\)\+]{6,8}$/"]]) === false;
+    $clave = [];
+    $clave['form'] = filter_input(INPUT_POST, 'clave', FILTER_UNSAFE_RAW);
+    $clave['san'] = filter_var($clave['form'], FILTER_SANITIZE_SPECIAL_CHARS);
+    $clave['err'] = filter_var($clave['san'], FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => "/^[\w!@#\$%\^&\*\(\)\+]{6,8}$/"]]) === false;
 
+    $datos['clave'] = $clave;
 // Lectura, saneamiento y validación del dato de correo
 // Formato correcto de correo
 
-    $correo = filter_input(INPUT_POST, 'correo', FILTER_SANITIZE_EMAIL);
-    $correoError = filter_var($correo, FILTER_VALIDATE_EMAIL) === false;
+    $correo = [];
+    $correo['form'] = filter_input(INPUT_POST, 'correo', FILTER_UNSAFE_RAW);
+    $correo['san'] = filter_var($correo['form'], FILTER_SANITIZE_EMAIL);
+    $correo['err'] = filter_var($correo['san'], FILTER_VALIDATE_EMAIL) === false;
 
+    $datos['correo'] = $correo;
 // Lectura del dato de fecha. La fecha ya viene validada del formulario
 
-    $fechaNac = filter_input(INPUT_POST, 'fechanac', FILTER_UNSAFE_RAW);
-    $fechaNacError = empty($fechaNac);
+    $fechaNac = [];
+    $fechaNac['form'] = filter_input(INPUT_POST, 'fechanac', FILTER_UNSAFE_RAW);
+    /*  $fechaNacError = filter_input(INPUT_POST, 'campo', FILTER_VALIDATE_REGEXP, [
+      "options" => ["regexp" => "/^.+$/"]]) === false; */
+    $fechaNac['err'] = empty($fechaNac['form']);
 
 // Lectura, saneamiento y validación del dato de telefono
 // Números sin blancos    
 
-    $tel = filter_input(INPUT_POST, 'tel', FILTER_SANITIZE_NUMBER_INT);
-    $telError = filter_var($tel, FILTER_VALIDATE_INT) === false;
+    $tel = [];
+    $tel['form'] = filter_input(INPUT_POST, 'tel', FILTER_UNSAFE_RAW);
+    $tel['san'] = filter_var($tel['form'], FILTER_SANITIZE_NUMBER_INT);
+    $tel['err'] = (strlen($tel['san']) < 8 || strlen($tel['san']) > 11);
 
+    $datos['tel'] = $tel;
 // Lectura del dato de tienda
-    $tienda = filter_input(INPUT_POST, 'tienda');
+    $tienda = [];
+    $tienda['form'] = filter_input(INPUT_POST, 'tienda');
 
+    $datos['tienda'] = $tienda;
 // Lectura, saneamiento y validación del dato de edad. Solo pueden acceder mayores de edad
 
-    $edad = filter_input(INPUT_POST, 'edad', FILTER_UNSAFE_RAW);
-    $edadError = is_null($edad);
+    $edad = [];
+
+    $edad['form'] = filter_input(INPUT_POST, 'edad', FILTER_UNSAFE_RAW);
+    $edad['san'] = filter_var($edad['form'], FILTER_SANITIZE_NUMBER_INT);
+    $edad['err'] = filter_var($edad['san'], FILTER_VALIDATE_INT, [
+                "options" => [
+                    "min_range" => 18,
+                    "max_range" => 120,
+                ]
+            ]) === false;
+
+    $datos['edad'] = $edad;
+
+// Lectura del dato de idioma.
+    $idioma = [];
+
+    $idioma['form'] = filter_input(INPUT_POST, 'idioma', FILTER_UNSAFE_RAW);
+    $idioma['err'] = empty($idioma['form']);
+
+    $datos['idioma'] = $idioma;
 
 // Validación del dato de suscripcion. Se convierte la respuesta a un valor booleano
-    $suscripcion = filter_input(INPUT_POST, 'suscripcion', FILTER_VALIDATE_BOOLEAN) ?? false;
+    $suscripcion = [];
+
+    $suscripcion['form'] = filter_input(INPUT_POST, 'suscripcion', FILTER_VALIDATE_BOOLEAN) ?? false;
+
+    $datos['suscripcion'] = $suscripcion;
 }
 ?>
 
@@ -53,7 +92,7 @@ if (filter_has_var(INPUT_POST, "enviar")) {
     </head>
     <body>
         <?php if (!filter_has_var(INPUT_POST, "enviar")): ?> <!-- Si se solicita el formulario -->
-            <div class="flex-pedad">
+            <div class="flex-page">
                 <h1>Customer Registration</h1>
                 <form class="capaform" nombre="registerform" 
                       action="<?= $_SERVER['PHP_SELF'] ?>" method="POST" novalidate>
@@ -64,7 +103,7 @@ if (filter_has_var(INPUT_POST, "enviar")) {
                         </div>
                         <div class="form-section">
                             <label for="clave">Clave:</label> 
-                            <input id="clave" type="clave" name="clave" placeholder="Introduce la clave" />
+                            <input id="clave" type="password" name="clave" placeholder="Introduce la clave" />
                         </div>
                         <div class="form-section">
                             <label for="correo">Correo:</label>
@@ -87,19 +126,19 @@ if (filter_has_var(INPUT_POST, "enviar")) {
                             </select> 
                         </div>
                         <div class="form-section">
-                            <label>Age:</label>
+                            <label for="edad">Edad:</label> 
+                            <input id="edad" type="number" name="edad" placeholder="Introduce tu edad" />
+                        </div>
+                        <div class="form-section">
+                            <label>Idioma preferido:</label>
                             <div class="select-section">
                                 <div>
-                                    <input id="-25" type="radio" name="edad" value="-25" /> 
-                                    <label for="-25">Más joven de 25</label>
+                                    <input id="español" type="radio" name="idioma" value="español" /> 
+                                    <label for="español">Español</label>
                                 </div>
                                 <div>
-                                    <input id="25-50" type="radio" name="edad" value="25-50" /> 
-                                    <label for="25-50">Entre 25 y 50</label>
-                                </div>
-                                <div>
-                                    <input id="50-" type="radio" name="edad" value="50-" />
-                                    <label for="50-">Mayor de 50</label>
+                                    <input id="inglés" type="radio" name="idioma" value="inglés" /> 
+                                    <label for="inglés">Inglés</label>
                                 </div>
                             </div>
                         </div>
@@ -119,21 +158,26 @@ if (filter_has_var(INPUT_POST, "enviar")) {
         <?php else: ?> <!-- Si se solicita el resultado de validar los datos introducidos en el formulario -->
             <div class="summary-section">
                 <h1>Datos del cliente</h1>
-                <p><?= ($nombreError) ? "Nombre no es válido" : "Nombre: $nombre" ?></p>
-                <p><?= ($claveError) ? "Clave no es válida" : "Clave: $clave" ?></p>
-                <p><?= ($correoError) ? "Correo no es válido" : "Correo: $correo" ?></p>
-                <p><?= ($fechaNacError) ? "Fecha de nacimiento no es válida" : "Fecha de naimiento: $fechaNac" ?></p>
-                <p><?= ($telError) ? "Telefono no es válido" : "Teléfono: $tel" ?></p>
-                <p>Shop: <?= $tienda ?></p>
-                <p><?=
-                    ($edadError) ? "Información sobre la edad no introducida" : "Edad: " .
-                            match ($edad) {'-25' => "Más joven de 25", '25-50' => "Entre 25 y 50", '50+' => "Mayor de 50"
-                            }
-                    ?></p>
-                <p>Suscripción: <?= ($suscripcion) ? "Suscrito" : "No suscrito" ?>
+                <table>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Valor</th>
+                        <th>Valor saneado lectura</th>
+                        <th>Valor válido/ No válido</th>
+                        <th>Valor htmlspecialchars</th>
+                    </tr>
+                    <?php foreach ($datos as $dato => $valores): ?>
+                        <tr>
+                            <td><?= $dato ?></td>
+                            <td><?= $valores['form'] ?? '' ?></td>
+                            <td><?= $valores['san'] ?? '' ?></td>
+                            <td><?= ($valores['err'] ?? false) ? "$dato no es válido" : "$dato es válido" ?></td>
+                            <td><?= htmlspecialchars($valores['form'] ?? '') ?></td>
+                        </tr>
+                    <?php endforeach ?>
+                </table>
+                <a href="<?= $_SERVER['PHP_SELF'] ?>" class="submit">Volver al formulario</a>
             </div>
         <?php endif ?>
     </body>
 </html>
-
-
