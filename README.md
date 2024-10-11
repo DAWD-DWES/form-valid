@@ -15,4 +15,4 @@ El script recibe los datos del formulario y los muestra en una tabla con los val
   y en el caso de que no sea un valor válido un mensaje informando de que el dato es inválido.
 Las dos páginas de la aplicación, formulario y la tabla resumen deben de construirse con el mismo script.
 Para facilitar la realización del ejercicio se proporciona el formulario HTML con los campos de captura de datos.
-Utiliza una arra bidimensional asociativo para recoger todos los datos que se van a mostrar en la tabla de la página resumen.
+Utiliza un array bidimensional asociativo para recoger todos los datos que se van a mostrar en la tabla de la página resumen.
