@@ -142,7 +142,7 @@ if (filter_has_var(INPUT_POST, "enviar")) {
                         </div>
                         <div class="form-section">
                             <label for="dni">DNI:</label>
-                            <input id="dni" type="text" name="dni" placeholder="Introduce tu DNI (12345678A)" />
+                            <input id="dni" type="text" name="dni" placeholder="Introduce el DNI (12345678A)" />
                         </div>
                         <div class="form-section">
                             <label for="clave">Clave:</label> 
