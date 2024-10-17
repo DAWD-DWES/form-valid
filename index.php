@@ -1,4 +1,5 @@
 <?php
+define("RUTA_IMAGENES", "imagenes");
 if (filter_has_var(INPUT_POST, "enviar")) {
     $datos = [];
 // Lectura, saneamiento y validación del dato de nombre
@@ -10,6 +11,15 @@ if (filter_has_var(INPUT_POST, "enviar")) {
                     ['options' => ['regexp' => "/^[a-z A-Záéíóúñ]{3,25}$/"]]) === false;
 
     $datos['nombre'] = $nombre;
+    // Lectura y validación del dato de DNI
+    $dni = [];
+    $dni['form'] = filter_input(INPUT_POST, 'dni', FILTER_UNSAFE_RAW);
+    $dni['san'] = filter_var($dni['form'], FILTER_SANITIZE_SPECIAL_CHARS);
+    $dni['err'] = filter_var($dni['san'], FILTER_VALIDATE_REGEXP,
+                    ['options' => ['regexp' => "/^[1-9][0-9]{7}[A-Z]$/"]]) === false ||
+            (substr($dni['san'], 8) != substr("TRWAGMYFPDXBNJZSQVHLCKE", ((int) substr($dni['san'], 0, 8) % 23), 1));
+    $datos['dni'] = $dni;
+
 // Lectura, saneamiento y validación del dato de contraseña
 // 6 a 8 caracteres con mayúsculas, minúsculas, digitos y los símbolos !@#$%^&*()+
 
@@ -85,6 +95,28 @@ if (filter_has_var(INPUT_POST, "enviar")) {
     $suscripcion['san'] = $suscripcion['form'] ? 'si' : 'no';
 
     $datos['suscripcion'] = $suscripcion;
+
+    // Validación y carga de la imagen
+    $foto = $_FILES['foto'];
+    $foto['err'] = false;
+
+    // Verifica que el archivo sea de tipo JPEG o JPG
+    if ($foto['error'] == UPLOAD_ERR_OK) {
+        $foto['form'] = $foto['name'];
+        $fileType = strtolower(pathinfo($foto['name'], PATHINFO_EXTENSION));
+        if (!$dni['err'] ?? false) {
+            if (in_array($fileType, ['jpg', 'jpeg'])) {
+                $destino = RUTA_IMAGENES . "/" . $dni['san'] . ".$fileType";
+                move_uploaded_file($foto['tmp_name'], $destino);
+            } else {
+                $foto['err'] = true; // Error si no es jpg/jpeg
+            }
+        }
+    } else {
+        $foto['err'] = true; // Error si hubo algún problema con la carga
+    }
+
+    $datos['foto'] = $foto;
 }
 ?>
 
@@ -101,11 +133,16 @@ if (filter_has_var(INPUT_POST, "enviar")) {
             <div class="flex-page">
                 <h1>Customer Registration</h1>
                 <form class="capaform" nombre="registerform" 
-                      action="<?= $_SERVER['PHP_SELF'] ?>" method="POST" novalidate>
+                      action="<?= $_SERVER['PHP_SELF'] ?>" method="POST" 
+                      enctype="multipart/form-data" novalidate>
                     <div class="flex-outer">
                         <div class="form-section">
                             <label for="nombre">Nombre:</label> 
                             <input id="nombre" type="text" name="nombre" placeholder="Introduce el nombre" />
+                        </div>
+                        <div class="form-section">
+                            <label for="dni">DNI:</label>
+                            <input id="dni" type="text" name="dni" placeholder="Introduce tu DNI (12345678A)" />
                         </div>
                         <div class="form-section">
                             <label for="clave">Clave:</label> 
@@ -175,13 +212,22 @@ if (filter_has_var(INPUT_POST, "enviar")) {
                                        value="Enviar" name="enviar" /> 
                             </div>
                         </div>
+                        <div class="form-section">
+                            <label for="foto">Foto:</label>
+                            <input id="foto" type="file" name="foto" accept=".jpg, .jpeg" />
+                        </div>
                     </div>
                 </form>
             </div>
         <?php else: ?> <!-- Si se solicita el resultado de validar los datos introducidos en el formulario -->
             <div class="summary-section">
                 <h1>Datos del cliente</h1>
-                <table>
+                <?php if (!$dni['err'] ?? false): ?>
+                    <div class="foto-container">
+                        <img src= "<?= $destino ?>" alt="Foto del usuario" class="foto-usuario">
+                    </div>
+                <?php endif ?>
+                <table class="valores">
                     <tr>
                         <th>Campo</th>
                         <th>Valor</th>

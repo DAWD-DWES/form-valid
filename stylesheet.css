@@ -83,7 +83,25 @@ input[type="text"], input[type="password"], input[type="tel"] {
     font-weight: bold;
 }
 
-table {
+/* Contenedor para centrar la imagen */
+.foto-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Estilo de la imagen */
+.foto-usuario {
+    width: 150px; /* Ajusta el tamaño según sea necesario */
+    height: auto;
+    border-radius: 50%; /* Forma circular */
+    border: 3px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+.valores {
     border-collapse: collapse;
     margin: 100px 0;
     font-size: 16px;
@@ -91,27 +109,27 @@ table {
 
 }
 
-th, td {
+.valores th, .valores td {
     padding: 12px 15px;
     border: 1px solid #ddd;
     color: #000; /* Color negro para el texto */
 }
 
-th {
+.valores th {
     background-color: #f4f4f4;
     color: #333;
     font-weight: bold;
 }
 
-tr:nth-child(even) {
+.valores tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-tr:nth-child(odd) {
+.valores tr:nth-child(odd) {
     background-color: #fff;
 }
 
-tr:hover {
+.valores tr:hover {
     background-color: #e0f7fa;
 }
 
